@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
 
@@ -23,6 +25,8 @@ class _AddDocState extends State<AddDoc> {
   final dName = TextEditingController();
   final discribe = TextEditingController();
   final title = TextEditingController();
+
+  final docDate = TextEditingController();
 
   bool isChecked = false;
   bool isDocument = false;
@@ -47,24 +51,23 @@ class _AddDocState extends State<AddDoc> {
       final filePath = file!.path;
       final finalFile = File(filePath);
 
-      final metadata = SettableMetadata(contentType: "image/jpeg");
+      // final metadata = SettableMetadata(contentType: "image/jpeg");
 
       final storageRef = FirebaseStorage.instance.ref();
 
       final uploadTask = await storageRef
           .child("images/${basename(file!.path)}")
-          .putFile(finalFile, metadata);
+          .putFile(finalFile);
       final meta = await uploadTask.ref.getMetadata();
 
       var dowurl = await uploadTask.ref.getDownloadURL();
       final user = FirebaseAuth.instance.currentUser!;
-      final user1 = FirebaseFirestore.instance
-          .collection('user/${user.uid}/documents')
-          .doc();
+      final user1 =
+          FirebaseFirestore.instance.collection('user/${user.uid}/documents');
 
       final data = {
         'title': title.text,
-        'date': date.text,
+        'date': docDate.text,
         'doc_type': documentType,
         'doctor_clinic': dName.text,
         'description': discribe.text,
@@ -74,25 +77,38 @@ class _AddDocState extends State<AddDoc> {
         'type': docTypeValue,
         "hasDoc": true,
       };
-      await user1.set(data, SetOptions(merge: true));
+
+      final docID = await user1.add(data);
+
+      FirebaseFirestore.instance
+          .collection('user/${user.uid}/documents')
+          .doc(docID.id)
+          .set({'doc_id': docID.id}, SetOptions(merge: true));
     } else {
       final user = FirebaseAuth.instance.currentUser!;
-      final user1 = FirebaseFirestore.instance
-          .collection('user/${user.uid}/documents')
-          .doc();
+      final user1 =
+          FirebaseFirestore.instance.collection('user/${user.uid}/documents');
 
       final data = {
         'title': title.text,
-        'date': date.text,
+        'date': docDate.text,
         'type': docTypeValue,
         'doctor_clinic': dName.text,
         'description': discribe.text,
         'visibility': isChecked,
         "hasDoc": false,
       };
-      await user1.set(data, SetOptions(merge: true));
+      final docID = await user1.add(data);
+      FirebaseFirestore.instance
+          .collection('user/${user.uid}/documents')
+          .doc(docID.id)
+          .set({'doc_id': docID.id}, SetOptions(merge: true));
     }
   }
+
+  final snbar = const SnackBar(
+    content: Text('Data added successfully'),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -153,12 +169,26 @@ class _AddDocState extends State<AddDoc> {
                         const SizedBox(
                           height: 15,
                         ),
-                        TextFormField(
-                          controller: date,
+                        TextField(
+                          controller: docDate,
                           decoration: const InputDecoration(
-                            labelText: 'Date',
-                            border: OutlineInputBorder(),
-                          ),
+                              icon: Icon(Icons.calendar_today),
+                              labelText: "Enter Date"),
+                          readOnly: true,
+                          onTap: () async {
+                            DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(1950),
+                                lastDate: DateTime(2100));
+                            if (pickedDate != null) {
+                              String formattedDate =
+                                  DateFormat('yyyy-MM-dd').format(pickedDate);
+                              setState(() {
+                                docDate.text = formattedDate.toString();
+                              });
+                            } else {}
+                          },
                         ),
                         const SizedBox(
                           height: 15,
@@ -290,8 +320,9 @@ class _AddDocState extends State<AddDoc> {
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              // addDetails();
                               uploadFile();
+                              // ignore: deprecated_member_use
+                              Scaffold.of(context).showSnackBar(snbar);
                             },
                             icon: const FaIcon(FontAwesomeIcons.bagShopping),
                             label: const Text('Save'),

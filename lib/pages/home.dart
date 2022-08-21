@@ -52,7 +52,8 @@ class Home extends StatelessWidget {
           'email': user.email,
           'name': user.displayName,
           'starting_date': DateTime.now(),
-          'uid': user.uid
+          'uid': user.uid,
+          'image': user.photoURL
         };
         await finalUser.set(data);
       }

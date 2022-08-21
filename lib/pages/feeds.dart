@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:prega/pages/edit_doc.dart';
 
 class Feeds extends StatefulWidget {
   const Feeds({Key? key}) : super(key: key);
@@ -10,7 +11,9 @@ class Feeds extends StatefulWidget {
 }
 
 class _FeedsState extends State<Feeds> {
-  final feedData = [];
+  final delMsg = const SnackBar(
+    content: Text('Doc deleted successfully!'),
+  );
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser!;
@@ -228,6 +231,7 @@ class _FeedsState extends State<Feeds> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
+                                                // Text(streamSnapshot.data?.docs.),
                                                 const Padding(
                                                   padding: EdgeInsets.symmetric(
                                                       horizontal: 15),
@@ -260,11 +264,55 @@ class _FeedsState extends State<Feeds> {
                                                   height: 15,
                                                 )
                                               ],
+                                            ),
+                                      // Edit Delete Implimentation
+
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 15),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditDoc(),
+                                                  ),
+                                                );
+                                              },
+                                              icon: const Icon(Icons.edit),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                FirebaseFirestore.instance
+                                                    .collection(
+                                                        'user/${user.uid}/documents')
+                                                    .doc(streamSnapshot.data
+                                                        ?.docs[index]['doc_id'])
+                                                    .delete()
+                                                    .then((value) => Scaffold
+                                                            .of(context)
+                                                        // ignore: deprecated_member_use
+                                                        .showSnackBar(delMsg));
+                                              },
+                                              icon: const Icon(Icons.delete),
+                                              color: const Color.fromARGB(
+                                                  255, 185, 32, 32),
                                             )
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 20,
+                                      )
                                     ],
                                   ),
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         )),

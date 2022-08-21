@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:prega/pages/edit_profile.dart';
+import 'package:prega/pages/share.dart';
 import 'package:prega/provider/google_signin.dart';
 import 'package:prega/widgets/tags.dart';
 import 'package:provider/provider.dart';
@@ -111,7 +112,7 @@ class MainHome extends StatelessWidget {
                               height: 36,
                             ),
                             Text(
-                              user.displayName!,
+                              data['name'],
                               style: const TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.w500),
                             ),
@@ -284,6 +285,31 @@ class MainHome extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Share()),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                                primary: const Color.fromARGB(255, 47, 46, 65),
+                                fixedSize: const Size(double.infinity, 46)),
+                            child: const Text(
+                              "Share to doctors",
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ),
+                      ),
                       const SizedBox(
                         height: 20,
                       ),

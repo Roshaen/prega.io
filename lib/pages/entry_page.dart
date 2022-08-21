@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:prega/pages/add_doc.dart';
+import 'package:prega/pages/edit_doc.dart';
 import 'package:prega/pages/feeds.dart';
 import 'package:prega/pages/main_home.dart';
+import 'package:prega/pages/tips.dart';
 
 void main() => runApp(const MyApp());
 
@@ -28,19 +30,11 @@ class _EntryPageState extends State<EntryPage> {
   int _selectedIndex = 0;
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    Feeds(),
-    AddDoc(),
-    // Center(
-    //   child: Text('This is the place for add document page'),
-    // ),
-    Center(
-      child: Text(
-        'Tips page',
-        style: optionStyle,
-      ),
-    ),
-    MainHome(),
+  static final List<Widget> _widgetOptions = <Widget>[
+    const Feeds(),
+    const AddDoc(),
+    Tips(),
+    const MainHome(),
   ];
 
   void _onItemTapped(int index) {
