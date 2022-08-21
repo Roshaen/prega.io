@@ -22,9 +22,16 @@ class _AddDocState extends State<AddDoc> {
   final type = TextEditingController();
   final dName = TextEditingController();
   final discribe = TextEditingController();
+  final title = TextEditingController();
 
   bool isChecked = false;
+  bool isDocument = false;
   File? file;
+
+  var docTypeList = ['Document', 'Issue', 'Medicine Updates', 'Baby Health'];
+  var documentTypeList = ['Prescription', 'Report', 'Ultrasonography'];
+  var docTypeValue = 'Issue';
+  var documentType = 'Prescription';
 
   Future selectFile() async {
     final result = await FilePicker.platform.pickFiles(allowMultiple: false);
@@ -36,50 +43,55 @@ class _AddDocState extends State<AddDoc> {
   }
 
   Future uploadFile() async {
-    final filePath = file!.path;
-    final finalFile = File(filePath);
+    if (isDocument) {
+      final filePath = file!.path;
+      final finalFile = File(filePath);
 
-    final metadata = SettableMetadata(contentType: "image/jpeg");
+      final metadata = SettableMetadata(contentType: "image/jpeg");
 
-    final storageRef = FirebaseStorage.instance.ref();
+      final storageRef = FirebaseStorage.instance.ref();
 
-    final uploadTask = await storageRef
-        .child("images/${basename(file!.path)}")
-        .putFile(finalFile, metadata);
+      final uploadTask = await storageRef
+          .child("images/${basename(file!.path)}")
+          .putFile(finalFile, metadata);
+      final meta = await uploadTask.ref.getMetadata();
 
-    var dowurl = await uploadTask.ref.getDownloadURL();
+      var dowurl = await uploadTask.ref.getDownloadURL();
+      final user = FirebaseAuth.instance.currentUser!;
+      final user1 = FirebaseFirestore.instance
+          .collection('user/${user.uid}/documents')
+          .doc();
 
-    final user = FirebaseAuth.instance.currentUser!;
-    final user1 = FirebaseFirestore.instance
-        .collection('user/${user.uid}/documents')
-        .doc();
+      final data = {
+        'title': title.text,
+        'date': date.text,
+        'doc_type': documentType,
+        'doctor_clinic': dName.text,
+        'description': discribe.text,
+        'visibility': isChecked,
+        'doc_url': dowurl,
+        'doc_format': meta.contentType,
+        'type': docTypeValue,
+        "hasDoc": true,
+      };
+      await user1.set(data, SetOptions(merge: true));
+    } else {
+      final user = FirebaseAuth.instance.currentUser!;
+      final user1 = FirebaseFirestore.instance
+          .collection('user/${user.uid}/documents')
+          .doc();
 
-    final data = {
-      'date': date.text,
-      'type': type.text,
-      'dName': dName.text,
-      'discription': discribe.text,
-      'visiblity': isChecked,
-      'link': dowurl
-    };
-    await user1.set(data, SetOptions(merge: true));
-  }
-
-  Future addDetails() async {
-    final user = FirebaseAuth.instance.currentUser!;
-    final user1 = FirebaseFirestore.instance
-        .collection('user/${user.uid}/documents')
-        .doc();
-
-    final data = {
-      'date': date.text,
-      'type': type.text,
-      'doctor_clinic': dName.text,
-      'discription': discribe.text,
-      'visiblity': isChecked,
-      'link': "link"
-    };
-    await user1.set(data, SetOptions(merge: true));
+      final data = {
+        'title': title.text,
+        'date': date.text,
+        'type': docTypeValue,
+        'doctor_clinic': dName.text,
+        'description': discribe.text,
+        'visibility': isChecked,
+        "hasDoc": false,
+      };
+      await user1.set(data, SetOptions(merge: true));
+    }
   }
 
   @override
@@ -121,7 +133,6 @@ class _AddDocState extends State<AddDoc> {
               ),
               Image.asset(
                 'assets/images/docPic.png',
-                // fit: BoxFit.cover,
                 height: 260,
               ),
               Padding(
@@ -133,6 +144,16 @@ class _AddDocState extends State<AddDoc> {
                     child: Column(
                       children: [
                         TextFormField(
+                          controller: title,
+                          decoration: const InputDecoration(
+                            labelText: 'Title',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        TextFormField(
                           controller: date,
                           decoration: const InputDecoration(
                             labelText: 'Date',
@@ -142,31 +163,80 @@ class _AddDocState extends State<AddDoc> {
                         const SizedBox(
                           height: 15,
                         ),
-                        TextFormField(
-                          controller: type,
+                        InputDecorator(
                           decoration: const InputDecoration(
-                            labelText: 'Type',
-                            border: OutlineInputBorder(),
+                              border: OutlineInputBorder()),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton(
+                                hint: Text(docTypeValue),
+                                items: docTypeList.map((String items) {
+                                  return DropdownMenuItem(
+                                    value: items,
+                                    child: Text(items),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    docTypeValue = newValue!;
+                                    if (newValue == 'Document') {
+                                      isDocument = true;
+                                    } else {
+                                      isDocument = false;
+                                    }
+                                  });
+                                }),
                           ),
                         ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: selectFile,
-                            icon: const FaIcon(FontAwesomeIcons.file),
-                            label: const Text('Open File'),
-                            style: ElevatedButton.styleFrom(
-                                primary: const Color.fromARGB(255, 47, 46, 65),
-                                fixedSize: const Size(double.infinity, 46)),
+                        if (docTypeValue == 'Document') ...[
+                          const SizedBox(
+                            height: 15,
                           ),
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Text(fileName),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: selectFile,
+                              icon: const FaIcon(FontAwesomeIcons.file),
+                              label: const Text('Open File'),
+                              style: ElevatedButton.styleFrom(
+                                  primary:
+                                      const Color.fromARGB(255, 47, 46, 65),
+                                  fixedSize: const Size(double.infinity, 46)),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          Text(fileName),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          InputDecorator(
+                            decoration: const InputDecoration(
+                                border: OutlineInputBorder()),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                  hint: Text(documentType),
+                                  items: documentTypeList.map((String items) {
+                                    return DropdownMenuItem(
+                                      value: items,
+                                      child: Text(items),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      documentType = newValue!;
+                                      isDocument = true;
+                                    });
+                                  }),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                        ],
                         const SizedBox(
                           height: 15,
                         ),
