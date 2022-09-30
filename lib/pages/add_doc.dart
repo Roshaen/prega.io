@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
+import 'package:prega/widgets/heading.dart';
 
 class AddDoc extends StatefulWidget {
   const AddDoc({Key? key}) : super(key: key);
@@ -124,29 +125,7 @@ class _AddDocState extends State<AddDoc> {
               const SizedBox(
                 height: 55,
               ),
-              Row(
-                children: [
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  Image.asset(
-                    'assets/icons/icon.png',
-                    height: 45,
-                    width: 45,
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  const Text(
-                    "Add Doc",
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w500,
-                      color: Color.fromARGB(255, 47, 46, 65),
-                    ),
-                  ),
-                ],
-              ),
+              Heading(title: "Add Doc"),
               Image.asset(
                 'assets/images/docPic.png',
                 height: 260,

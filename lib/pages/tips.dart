@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prega/widgets/heading.dart';
 
 class Tips extends StatelessWidget {
   Tips({Key? key}) : super(key: key);
@@ -26,29 +27,7 @@ class Tips extends StatelessWidget {
           const SizedBox(
             height: 55,
           ),
-          Row(
-            children: [
-              const SizedBox(
-                width: 15,
-              ),
-              Image.asset(
-                'assets/icons/icon.png',
-                height: 45,
-                width: 45,
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              const Text(
-                "Tips",
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.w500,
-                  color: Color.fromARGB(255, 47, 46, 65),
-                ),
-              ),
-            ],
-          ),
+          Heading(title: "Tips"),
           const SizedBox(
             height: 30,
           ),

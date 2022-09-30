@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:prega/pages/edit_doc.dart';
+import 'package:prega/widgets/heading.dart';
 
 class Feeds extends StatefulWidget {
   const Feeds({Key? key}) : super(key: key);
@@ -28,30 +29,13 @@ class _FeedsState extends State<Feeds> {
               child: Column(
                 children: [
                   const SizedBox(
-                    height: 55,
+                    height: 35,
                   ),
-                  Row(
-                    children: [
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      Image.asset(
-                        'assets/icons/icon.png',
-                        height: 45,
-                        width: 45,
-                      ),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      const Text(
-                        "Your Docs",
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.w500,
-                          color: Color.fromARGB(255, 47, 46, 65),
-                        ),
-                      ),
-                    ],
+                  Heading(
+                    title: "Your Feeds",
+                  ),
+                  const SizedBox(
+                    height: 20,
                   ),
                   ListView.builder(
                     scrollDirection: Axis.vertical,
